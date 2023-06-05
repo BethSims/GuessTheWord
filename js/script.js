@@ -19,8 +19,8 @@ const word = "magnolia";
 //Guessed letters
 const guessedLetters = [];
 
-//Updates the word progress paragraph
-const updateProgress = function(word) {
+//Creates the placeholders for the word to be guessed
+const placeholder = function(word) {
     const wordArray = word.split("");
     const returnArray = [];
     wordArray.forEach(function (letter) {
@@ -29,7 +29,7 @@ const updateProgress = function(word) {
     wordProgress.innerText = returnArray.join("");
 };
 
-updateProgress(word);
+placeholder(word);
 
 //Button click event listener
 guessButton.addEventListener("click", function(e) {
@@ -47,11 +47,15 @@ guessButton.addEventListener("click", function(e) {
     letterInput.value="";
 });
 
+//Make sure its a valid guess
 const validateInput = function (input) {
     const acceptedLetter = /[a-zA-Z]/
     if (input.length === 0) {
         //Is the input empty?
         message.innerText = "You didn't guess anything!";
+    } else if (input.length > 1) {
+        //Is there more than one letter?
+        message.innerText = "Please enter a single letter.";
     } else if (!input.match(acceptedLetter)) {
         //Is the input a letter?
         message.innerText = "You need to guess a letter from A to Z!";
@@ -61,12 +65,50 @@ const validateInput = function (input) {
     }
 };
 
+//A guess is made
 const makeGuess = function(letter) {
-    letter.toUpperCase();
+    letter = letter.toUpperCase();
     if (guessedLetters.includes(letter)) {
         message.innerText = "You've already guessed that letter! Try again!";
     } else {
         guessedLetters.push(letter);
+        console.log(guessedLetters)
+        updateGuessList();
+        updateProgress(guessedLetters);
     }
     console.log(guessedLetters)
 }
+
+// Show each guessed letter 
+const updateGuessList = function () {
+    guessedLettersElement.innerHTML = "";
+    for (const letter of guessedLetters) {
+    const li = document.createElement("li");
+    li.innerText = letter;
+    guessedLettersElement.append(li);
+    }
+};
+
+//Update the word progress with correctly guessed letters
+const updateProgress = function (guessedLetters) {
+    const wordUpper = word.toUpperCase();
+    const wordArray = wordUpper.split("");
+    // console.log(wordArray)
+    const updateArray = [];
+    for (const letter of wordArray)
+    if (guessedLetters.includes(letter)) {
+        updateArray.push(letter);
+    } else {
+        updateArray.push("●")
+    };
+    wordProgress.innerText = updateArray.join("");
+    winCondition();
+};
+
+//Check for win condition
+const winCondition =  function () {
+    if (wordProgress.innerText === word.toUpperCase()) {
+        message.classList.add("win");
+        message.innerHTML = `<p class="highlight"> You guessed the word correctly! Congrats!</p>`;
+    }
+};
