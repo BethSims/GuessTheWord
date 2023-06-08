@@ -15,9 +15,27 @@ const message = document.querySelector(".message");
 //Play again button
 const playAgainButton = document.querySelector(".play-again");
 //Word to be guessed
-const word = "magnolia";
+let word = "magnolia";
 //Guessed letters
 const guessedLetters = [];
+//Guesses remaining
+let remainingGuesses = 8;
+
+//Calling a random word API
+const getWord = async function () {
+    const request = await fetch("https://gist.githubusercontent.com/skillcrush-curriculum/7061f1d4d3d5bfe47efbfbcfe42bf57e/raw/5ffc447694486e7dea686f34a6c085ae371b43fe/words.txt");
+    const words = await request.text(); 
+    // console.log(words);
+    const wordsArray = words.split("\n");
+    // console.log(wordsArray);
+    //Grabbing a random word from the array just created
+    const randomIndex = Math.floor(Math.random() * wordsArray.length);
+    word = wordsArray[randomIndex].trim();
+    // console.log(word);
+    placeholder(word);
+};
+
+getWord();
 
 //Creates the placeholders for the word to be guessed
 const placeholder = function(word) {
@@ -28,8 +46,6 @@ const placeholder = function(word) {
     });
     wordProgress.innerText = returnArray.join("");
 };
-
-placeholder(word);
 
 //Button click event listener
 guessButton.addEventListener("click", function(e) {
@@ -72,11 +88,11 @@ const makeGuess = function(letter) {
         message.innerText = "You've already guessed that letter! Try again!";
     } else {
         guessedLetters.push(letter);
-        console.log(guessedLetters)
         updateGuessList();
+        guessesRemaining(letter);
         updateProgress(guessedLetters);
     }
-    console.log(guessedLetters)
+    // console.log(guessedLetters)
 }
 
 // Show each guessed letter 
@@ -105,10 +121,32 @@ const updateProgress = function (guessedLetters) {
     winCondition();
 };
 
+//Displays the guesses remaining
+const guessesRemaining = function (guess) {
+    const compareWord = word.toUpperCase();
+    //Finding out if the guess is in the word
+    if (compareWord.includes(guess)) {
+        message.innerText = "That letter is correct!";
+    } else {
+        message.innerText = "That letter is incorrect";
+        remainingGuesses -= 1;
+
+    }
+    //Finding out how many guesses are left
+    if (remainingGuesses === 0) {
+        message.innerHTML = `Oh no! You lost! The word you were looking for was <span class="highlight">${word.toUpperCase()}</span>`;
+    } else if (remainingGuesses === 1) {
+        remainingGuessesNum.innerText = "1 guess";
+    } else {
+        remainingGuessesNum.innerText = `${remainingGuesses} guesses`;
+    }
+    // console.log(remainingGuesses);
+};
+
 //Check for win condition
 const winCondition =  function () {
     if (wordProgress.innerText === word.toUpperCase()) {
         message.classList.add("win");
-        message.innerHTML = `<p class="highlight"> You guessed the word correctly! Congrats!</p>`;
+        message.innerHTML = `<p class="highlight"> You won! Congrats! 🥳</p>`;
     }
 };
